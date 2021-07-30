@@ -1,0 +1,187 @@
+package clothes;
+
+import java.sql.*;
+import java.util.Scanner;
+
+public class ShopSQL {
+	Connection con = null;
+	ResultSet rs = null;
+	Statement stmt = null;
+	PreparedStatement pstmt = null;
+	Scanner sc = new Scanner(System.in);
+
+	public void connect() {
+		con = DBC.DBConnect();
+	}
+
+	public void conClose() {
+		try {
+			con.close();
+			System.out.println("접속 해제!");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	public void newMember() {
+		System.out.println("회원정보를 입력해주세요.");
+
+		System.out.print("회원번호(3**)>> ");
+		int memberno = sc.nextInt();
+
+		System.out.print("이름>> ");
+		String name = sc.next();
+
+		System.out.print("태어난 년도(네자리!)>>");
+		String year = sc.next();
+
+		System.out.print("태어난 달(1~12)>> ");
+		int month = sc.nextInt();
+
+		System.out.print("태어난 일(1~31)>> ");
+		int day = sc.nextInt();
+
+		System.out.print("성별(남/여)>> ");
+		String gender = sc.next();
+
+		System.out.print("비밀번호(네자리숫자)>> ");
+		String password = sc.next();
+
+		System.out.print("전화번호>> ");
+		String phone = sc.next();
+
+		System.out.print("주소>> ");
+		String addr = sc.next();
+
+		System.out.print("계좌번호>> ");
+		String account = sc.next();
+
+		String month1;
+		String day1;
+
+		if (month >= 10) {
+			month1 = Integer.toString(month);
+			// 뒤에 숫자를 문자로 바꿀게요!
+		} else {
+			month1 = "0" + Integer.toString(month);
+		}
+		if (day >= 10) {
+			day1 = Integer.toString(day);
+		} else {
+			day1 = "0" + Integer.toString(day);
+		}
+
+		String birth = year + month1 + day1;
+
+		new Client(memberno, name, birth, gender, password, phone, addr, account);
+
+		String sql = "INSERT INTO MEMBER VALUES(?,?,TO_DATE(?),?,?,?,?,?)";
+
+		try {
+			pstmt = con.prepareStatement(sql);
+
+			pstmt.setInt(1, memberno);
+			pstmt.setString(2, name);
+			pstmt.setString(3, birth);
+			pstmt.setString(4, gender);
+			pstmt.setString(5, password);
+			pstmt.setString(6, phone);
+			pstmt.setString(7, addr);
+			pstmt.setString(8, account);
+
+			int result = pstmt.executeUpdate();
+			if (result > 0) {
+				System.out.println("회원가입 성공!!");
+			} else {
+				System.out.println("회원가입 실패..");
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public void list(String table) {
+		String sql = null;
+
+		if (table.equals("상의")) {
+			sql = "SELECT * FROM TOP";
+		} else {
+			sql = "SELECT * FROM PANTS";
+		}
+
+		try {
+			stmt = con.createStatement();
+			rs = stmt.executeQuery(sql);
+
+			while (rs.next()) {
+
+				System.out.println();
+				System.out.println("상품명 : " + rs.getString(1));
+				System.out.println("사이즈 : " + rs.getString(2));
+				System.out.println("색상 : " + rs.getString(3));
+				System.out.println("가격 : " + rs.getString(4));
+			}
+
+		} catch (SQLException e) {
+			System.out.println("SQLException 발생!");
+			e.printStackTrace();
+		}
+	}
+
+	public boolean idcheck(int nick, String pw) {
+		boolean check = false;
+
+		String sql = "SELECT * FROM MEMBER WHERE MEMBERNO=? AND PASSWORD=?";
+		try {
+			pstmt = con.prepareStatement(sql);
+			pstmt.setInt(1, nick);
+			pstmt.setString(2, pw);
+
+			rs = pstmt.executeQuery();
+
+			if (rs.next()) {
+				check = true;
+			} else {
+				System.out.println("회원번호와 비밀번호가 일치하지 않습니다!");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				pstmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return check;
+	}
+public void order(String string) {
+			
+			String sql = "SELECT * from ORDERS ";
+			
+			try {
+				stmt = con.createStatement();
+				rs = stmt.executeQuery(sql);
+				
+				while(rs.next()) {
+					System.out.println();
+					System.out.println("회원번호  : "+ rs.getInt(1));
+					System.out.println("상품명 :"+ rs.getString(2));
+					System.out.println("사이즈 :"+ rs.getString(3));
+			
+					System.out.println("색상 :"+ rs.getString(4));
+					System.out.println("가격 :"+ rs.getString(5));
+					System.out.println("주소 :"+ rs.getString(6));
+				}
+				}catch(SQLException e) {
+
+					e.printStackTrace();
+				}
+		
+				}
+			
+}
